@@ -13,7 +13,7 @@ def run(collection):
     max_retries = 3
     result = False
 
-    while result == False and retries < max_retries:
+    while result is False and retries < max_retries:
         try:
             result = Crawler.run(businesses_file, filtered_urls_file, collection)
         except:
