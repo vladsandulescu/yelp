@@ -116,7 +116,7 @@ def run(output, term, location):
 
 
 def main():
-    run('restaurants_la', 'restaurants', 'Los Angeles, CA')
+    run('restaurants_sf', 'restaurants', 'San Francisco, CA')
 
 
 if __name__ == '__main__':
