@@ -152,10 +152,13 @@ class Crawler:
         print 'Done {0}/{1}'.format(done, total)
         for business in businesses:
             if not crawler_active.exists(business.name):
-                for url in business.filteredUrls:
-                    crawler_filtered.crawl(business, url, is_not_recommended=True)
                 for url in business.activeUrls:
-                    crawler_active.crawl(business, url, is_not_recommended=False)
+                    crawler_active.crawl(url)
+                    crawler_active.save(business, is_not_recommended=False)
+                    crawler_friends.update_user_friends(business)
+                for url in business.filteredUrls:
+                    crawler_filtered.crawl(url)
+                    crawler_filtered.save(business, is_not_recommended=True)
             done += 1
             print 'Done {0}/{1}'.format(done, total)
 
