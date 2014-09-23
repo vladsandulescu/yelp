@@ -67,7 +67,7 @@ class Crawler:
         for i in xrange(0, int(friends_count) / page + 1, 1):
             crawl_url = str(url).replace('user_details', 'user_details_friends') + '&start=' + str(i * page)
             self.crawl(crawl_url)
-            friends.append([User(row["user"], row["user/_text"], row["friends"], row["reviews"], row["location"])
+            friends.extend([User(row["user"], row["user/_text"], row["friends"], row["reviews"], row["location"])
                             for row in self.dataRows])
 
         return friends
@@ -75,7 +75,7 @@ class Crawler:
     def save(self, business, is_not_recommended):
         for row in self.dataRows:
             if "text" in row:
-                user = User(row["user"], row["user"], row["friends"], row["reviews"], row["location"], [])
+                user = User(row["user"], row["user"], row["friends"], row["reviews"], row["location"] if "location" in row else "", [])
                 review = Review(row["friends"], row["reviews"], row["date"], row["text"], row["rating"], user)
                 if is_not_recommended:
                     business.filteredReviews.append(review)
