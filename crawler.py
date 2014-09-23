@@ -53,6 +53,23 @@ class Crawler:
 
         self.queryLatch.await()
         self.save(business, is_not_recommended)
+    def update_user_friends(self, business):
+        for review in business.activeReviews:
+            if review.user.friends > 0 and len(review.user.friends_list) == 0:
+                review.user.friends_list = self.crawl_friends(review.user.link, review.user.friends)
+
+        self.save_business(business)
+
+    def crawl_friends(self, url, friends_count):
+        friends = []
+        page = 100
+        for i in xrange(0, int(friends_count) / page + 1, 1):
+            crawl_url = str(url).replace('user_details', 'user_details_friends') + '&start=' + str(i * page)
+            self.crawl(crawl_url)
+            friends.append([User(row["user"], row["user/_text"], row["friends"], row["reviews"], row["location"])
+                            for row in self.dataRows])
+
+        return friends
 
     def save(self, business, is_not_recommended):
         for row in self.dataRows:
