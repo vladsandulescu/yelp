@@ -7,6 +7,7 @@ from importio import importio
 from importio import latch
 from repository.business import Business
 from repository.review import Review
+from repository.user import User
 from settings.settings import Settings
 
 
@@ -43,7 +44,7 @@ class Crawler:
         if query.finished():
             self.queryLatch.countdown()
 
-    def crawl(self, business, query_url, is_not_recommended):
+    def crawl(self, query_url):
         self.dataRows = []
         self.queryLatch = latch.latch(1)
         self.client.query(
@@ -52,7 +53,7 @@ class Crawler:
             }, self.callback)
 
         self.queryLatch.await()
-        self.save(business, is_not_recommended)
+
     def update_user_friends(self, business):
         for review in business.activeReviews:
             if review.user.friends > 0 and len(review.user.friends_list) == 0:
@@ -74,7 +75,8 @@ class Crawler:
     def save(self, business, is_not_recommended):
         for row in self.dataRows:
             if "text" in row:
-                review = Review(row["friends"], row["reviews"], row["date"], row["text"], row["rating"])
+                user = User(row["user"], row["user"], row["friends"], row["reviews"], row["location"], [])
+                review = Review(row["friends"], row["reviews"], row["date"], row["text"], row["rating"], user)
                 if is_not_recommended:
                     business.filteredReviews.append(review)
                 else:
@@ -142,6 +144,7 @@ class Crawler:
 
         crawler_active = Crawler(db, collection, Settings.IMPORTIO_CRAWLER_ACTIVE, client)
         crawler_filtered = Crawler(db, collection, Settings.IMPORTIO_CRAWLER_FILTERED, client)
+        crawler_friends = Crawler(db, collection, Settings.IMPORTIO_CRAWLER_FRIENDS, client)
 
         businesses = Crawler.generate_urls(businesses_file, filtered_urls_file)
         done = 0
