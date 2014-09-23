@@ -27,7 +27,7 @@ def run(collection):
 
 
 def main():
-    run('restaurants_la')
+    run('restaurants_sf')
 
 
 if __name__ == '__main__':
