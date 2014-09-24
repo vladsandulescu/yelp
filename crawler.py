@@ -2,6 +2,7 @@ import json
 
 from pymongo import MongoClient
 from bson import ObjectId
+import sys
 
 from importio import importio
 from importio import latch
@@ -20,16 +21,10 @@ class Crawler:
         self.dataRows = []
         self.queryLatch = latch.latch(0)
 
-        self.client.connect()
-
-    def __del__(self):
-        self.client.disconnect()
-
     def callback(self, query, message):
         # Disconnect messages happen if we disconnect the client library while a query is in progress
         if message["type"] == "DISCONNECT":
             print "Query in progress when library disconnected"
-            print json.dumps(message["data"], indent=4)
 
         if message["type"] == "MESSAGE":
             if "errorType" in message["data"]:
@@ -59,23 +54,29 @@ class Crawler:
             if review.user.friends > 0 and len(review.user.friends_list) == 0:
                 review.user.friends_list = self.crawl_friends(review.user.link, review.user.friends)
 
-        self.save_business(business)
+            self.save_business(business)
 
     def crawl_friends(self, url, friends_count):
         friends = []
         page = 100
+        print "Crawl friends for " + url + " - " + str(friends_count)
         for i in xrange(0, int(friends_count) / page + 1, 1):
             crawl_url = str(url).replace('user_details', 'user_details_friends') + '&start=' + str(i * page)
             self.crawl(crawl_url)
-            friends.extend([User(row["user"], row["user/_text"], row["friends"], row["reviews"], row["location"])
-                            for row in self.dataRows])
+            try:
+                friends.extend([User(row["user"], row["user/_text"], row["friends"], row["reviews"],
+                                     row["location"] if "location" in row else "")
+                                for row in self.dataRows])
+            except:
+                print "Unexpected error:", sys.exc_info()[0]
 
         return friends
 
     def save(self, business, is_not_recommended):
         for row in self.dataRows:
             if "text" in row:
-                user = User(row["user"], row["user"], row["friends"], row["reviews"], row["location"] if "location" in row else "", [])
+                user = User(row["user"], row["user"], row["friends"], row["reviews"],
+                            row["location"] if "location" in row else "", [])
                 review = Review(row["friends"], row["reviews"], row["date"], row["text"], row["rating"], user)
                 if is_not_recommended:
                     business.filteredReviews.append(review)
@@ -91,8 +92,9 @@ class Crawler:
             business._id = existing["_id"]
         self.database[self.collection].save(business.encode())
 
-    def exists(self, name):
-        return self.database[self.collection].find_one({"name": name}) is not None
+    @staticmethod
+    def exists(name, database, collection):
+        return database[collection].find_one({"name": name}) is not None
 
     @staticmethod
     def generate_urls(businesses_file, filtered_urls_file):
@@ -140,7 +142,7 @@ class Crawler:
             user_id=Settings.IMPORTIO_USER_ID,
             api_key=Settings.IMPORTIO_API_KEY,
             host=Settings.IMPORTIO_HOST)
-        client.disconnect()
+        client.connect()
 
         crawler_active = Crawler(db, collection, Settings.IMPORTIO_CRAWLER_ACTIVE, client)
         crawler_filtered = Crawler(db, collection, Settings.IMPORTIO_CRAWLER_FILTERED, client)
@@ -151,14 +153,19 @@ class Crawler:
         total = len(businesses)
         print 'Done {0}/{1}'.format(done, total)
         for business in businesses:
-            if not crawler_active.exists(business.name):
+            if not Crawler.exists(business.name, db, collection):
                 for url in business.activeUrls:
                     crawler_active.crawl(url)
                     crawler_active.save(business, is_not_recommended=False)
-                    crawler_friends.update_user_friends(business)
                 for url in business.filteredUrls:
                     crawler_filtered.crawl(url)
                     crawler_filtered.save(business, is_not_recommended=True)
+            #crawler_friends.update_user_friends(business)
+            #client.disconnect()
+            #client.connect()
+            #print 'Client reconnected'
+
+
             done += 1
             print 'Done {0}/{1}'.format(done, total)
 
