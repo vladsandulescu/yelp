@@ -160,11 +160,10 @@ class Crawler:
                 for url in business.filteredUrls:
                     crawler_filtered.crawl(url)
                     crawler_filtered.save(business, is_not_recommended=True)
-            #crawler_friends.update_user_friends(business)
-            #client.disconnect()
-            #client.connect()
-            #print 'Client reconnected'
-
+            crawler_friends.update_user_friends(business)
+            client.disconnect()
+            client.connect()
+            print 'Client reconnected'
 
             done += 1
             print 'Done {0}/{1}'.format(done, total)
