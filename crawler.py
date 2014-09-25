@@ -1,8 +1,8 @@
 import json
+import sys
 
 from pymongo import MongoClient
 from bson import ObjectId
-import sys
 
 from importio import importio
 from importio import latch
@@ -50,11 +50,16 @@ class Crawler:
         self.queryLatch.await()
 
     def update_user_friends(self, business):
-        for review in business.activeReviews:
-            if review.user.friends > 0 and len(review.user.friends_list) == 0:
-                review.user.friends_list = self.crawl_friends(review.user.link, review.user.friends)
+        try:
+            firstUsersThreshold = 20
+            business.activeReviews.sort()
+            for review in business.activeReviews[:firstUsersThreshold]:
+                if review.user.friends > 0 and len(review.user.friends_list) == 0:
+                    review.user.friends_list = self.crawl_friends(review.user.link, review.user.friends)
 
-            self.save_business(business)
+                self.save_business(business)
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
 
     def crawl_friends(self, url, friends_count):
         friends = []
@@ -153,6 +158,7 @@ class Crawler:
         done = 0
         total = len(businesses)
         print 'Done {0}/{1}'.format(done, total)
+
         for business in businesses:
             if not Crawler.exists(business.name, db, collection):
                 for url in business.activeUrls:
