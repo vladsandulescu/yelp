@@ -10,6 +10,9 @@ class Review:
         self.rating = rating
         self.user = user
 
+    def __cmp__(self, other):
+        return cmp(self.date, other.date)
+
     def encode(self):
         return \
             {
