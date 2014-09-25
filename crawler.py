@@ -75,7 +75,8 @@ class Crawler:
     def save(self, business, is_not_recommended):
         for row in self.dataRows:
             if "text" in row:
-                user = User(row["user"], row["user"], row["friends"], row["reviews"],
+                user = User(row["user"], row["user/_text"] if "user/_text" in row else row["user"],
+                            row["friends"], row["reviews"],
                             row["location"] if "location" in row else "", [])
                 review = Review(row["friends"], row["reviews"], row["date"], row["text"], row["rating"], user)
                 if is_not_recommended:
