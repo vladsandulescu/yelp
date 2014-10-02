@@ -30,7 +30,7 @@ class Crawler:
             if "errorType" in message["data"]:
 
                 # In this case, we received a message, but it was an error from the external service
-                print "Got an error!"
+                print "Got an error! Connector: " + str(self.connector)
                 print json.dumps(message["data"], indent=4)
             else:
                 self.dataRows.extend(message["data"]["results"])
@@ -69,8 +69,12 @@ class Crawler:
             crawl_url = str(url).replace('user_details', 'user_details_friends') + '&start=' + str(i * page)
             self.crawl(crawl_url)
             try:
-                friends.extend([User(row["user"], row["user/_text"], row["friends"], row["reviews"],
-                                     row["location"] if "location" in row else "")
+                row_user = row["user"] if "user" in row else ""
+                row_user_text = row["user/_text"] if "user/_text" in row else row_user
+                row_friends = row["friends"] if "friends" in row else 0
+                row_reviews = row["reviews"] if "reviews" in row else 0
+                row_location = row["location"] if "location" in row else ""
+                friends.extend([User(row_user, row_user_text, row_friends, row_reviews, row_location)
                                 for row in self.dataRows])
             except:
                 print "Unexpected error:", sys.exc_info()[0]
@@ -80,10 +84,16 @@ class Crawler:
     def save(self, business, is_not_recommended):
         for row in self.dataRows:
             if "text" in row:
-                user = User(row["user"], row["user/_text"] if "user/_text" in row else row["user"],
-                            row["friends"], row["reviews"],
-                            row["location"] if "location" in row else "", [])
-                review = Review(row["friends"], row["reviews"], row["date"], row["text"], row["rating"], user)
+                row_user = row["user"] if "user" in row else ""
+                row_user_text = row["user/_text"] if "user/_text" in row else row_user
+                row_friends = row["friends"] if "friends" in row else 0
+                row_reviews = row["reviews"] if "reviews" in row else 0
+                row_location = row["location"] if "location" in row else ""
+                row_date = row["date"] if "date" in row else 0
+                row_text = row["text"] if "text" in row else ""
+                row_rating = row["rating"] if "rating" in row else 0
+                user = User(row_user, row_user_text, row_friends, row_reviews, row_location, [])
+                review = Review(row_friends, row_reviews, row_date, row_text, row_rating, user)
                 if is_not_recommended:
                     business.filteredReviews.append(review)
                 else:
