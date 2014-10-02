@@ -69,12 +69,11 @@ class Crawler:
             crawl_url = str(url).replace('user_details', 'user_details_friends') + '&start=' + str(i * page)
             self.crawl(crawl_url)
             try:
-                row_user = row["user"] if "user" in row else ""
-                row_user_text = row["user/_text"] if "user/_text" in row else row_user
-                row_friends = row["friends"] if "friends" in row else 0
-                row_reviews = row["reviews"] if "reviews" in row else 0
-                row_location = row["location"] if "location" in row else ""
-                friends.extend([User(row_user, row_user_text, row_friends, row_reviews, row_location)
+                friends.extend([User(row["user"] if "user" in row else "",
+                                     row["user/_text"] if "user/_text" in row else (row["user"] if "user" in row else ""),
+                                     row["friends"] if "friends" in row else 0,
+                                     row["reviews"] if "reviews" in row else 0,
+                                     row["location"] if "location" in row else "")
                                 for row in self.dataRows])
             except:
                 print "Unexpected error:", sys.exc_info()[0]
