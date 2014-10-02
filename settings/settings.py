@@ -6,7 +6,7 @@ class Settings:
         pass
 
     IMPORTIO_USER_ID = "98e321b1-614c-4b53-bd78-212804a036d1"
-    IMPORTIO_API_KEY = "FAkA7z0C8iZbjynO/6S8IhBhLttMI0HYEcN2/VYXjX+Ae1K0L945UUkjrEtww+dPzPxwroipuKfb1f5fPe514Q=="
+    IMPORTIO_API_KEY = "VsQ4x6LbP4cByA9uT+w2S/gvbw8fvgnr1Zc46beUZX9skGBjfmx3Z6kIvGDcDf+RIlQasRm7Db/J/vTEDSVOPA=="
     IMPORTIO_HOST = "https://query.import.io"
     IMPORTIO_CRAWLER_ACTIVE = ["5344191b-ac10-4f28-9d11-ee2ca522727c"]
     IMPORTIO_CRAWLER_FILTERED = ["3988818d-7d21-4552-93d7-e8b40bd28bee"]
@@ -18,4 +18,4 @@ class Settings:
     YELP_TOKEN_SECRET = 'Js_vCDOCts-MQB8-bZ2WRTkpfYw'
 
     CONNECTION_STRING = "mongodb://localhost:27030/"
-    DATABASE_NAME = "Yelp_with_Users"
+    DATABASE_NAME = "Yelp_with_Friends"
