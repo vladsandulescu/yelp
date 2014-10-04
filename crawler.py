@@ -25,6 +25,7 @@ class Crawler:
         # Disconnect messages happen if we disconnect the client library while a query is in progress
         if message["type"] == "DISCONNECT":
             print "Query in progress when library disconnected"
+            raise Exception("import.io disconnected")
 
         if message["type"] == "MESSAGE":
             if "errorType" in message["data"]:
@@ -176,10 +177,10 @@ class Crawler:
                 for url in business.filteredUrls:
                     crawler_filtered.crawl(url)
                     crawler_filtered.save(business, is_not_recommended=True)
-            crawler_friends.update_user_friends(business)
-            client.disconnect()
-            client.connect()
-            print 'Client reconnected'
+                crawler_friends.update_user_friends(business)
+            # client.disconnect()
+            # client.connect()
+            # print 'Client reconnected'
 
             done += 1
             print 'Done {0}/{1}'.format(done, total)
