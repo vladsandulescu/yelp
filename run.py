@@ -1,3 +1,8 @@
+import calendar
+import re
+import traceback
+import datetime
+
 __author__ = 'Vlad'
 
 import sys
@@ -19,6 +24,7 @@ def run(collection):
         except:
             retries += 1
             print "Unexpected error:", sys.exc_info()[0]
+            print traceback.format_exc()
             print "Will retry to run"
             if retries == max_retries:
                 print "Unexpected error:", sys.exc_info()[0]
